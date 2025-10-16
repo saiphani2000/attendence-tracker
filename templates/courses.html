@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Your Courses</h3>
+  <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+</div>
+
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Courses</h5>
+        <div class="table-responsive">
+          <table class="table table-striped" data-sortable>
+            <thead>
+              <tr>
+                <th data-sort="string">Name</th>
+                <th data-sort="string">Code</th>
+                <th data-sort="int">Enrolled</th>
+                <th data-sort="int">Sessions</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in courses %}
+              <tr>
+                <td>{{ row.course.name }}</td>
+                <td>{{ row.course.code }}</td>
+                <td>{{ row.enrolled_count }}</td>
+                <td>{{ row.sessions_count }}</td>
+                <td>
+                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('enroll', course_id=row.course.id) }}">Enroll</a>
+                  <a class="btn btn-sm btn-outline-success" href="{{ url_for('create_session', course_id=row.course.id) }}">New Session</a>
+                  <a class="btn btn-sm btn-outline-dark" href="{{ url_for('course_report', course_id=row.course.id) }}">Report</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Create Course</h5>
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Course Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Course Code</label>
+            <input type="text" name="code" class="form-control" required>
+          </div>
+          <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
