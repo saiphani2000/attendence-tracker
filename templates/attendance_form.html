@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Mark Attendance — {{ course.name }} ({{ course.code }})</h3>
+  <a href="{{ url_for('courses') }}" class="btn btn-outline-secondary">Back to Courses</a>
+</div>
+
+<div class="mb-3">
+  <span class="badge bg-info">Date: {{ sess.date }}</span>
+  {% if sess.topic %}<span class="badge bg-secondary ms-2">Topic: {{ sess.topic }}</span>{% endif %}
+</div>
+
+<form method="post">
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle" data-sortable>
+      <thead class="table-light">
+        <tr>
+          <th data-sort="string">Student</th>
+          <th data-sort="string">Email</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>{{ s.name }}</td>
+          <td>{{ s.email }}</td>
+          <td style="max-width: 200px;">
+            <select class="form-select" name="status_{{ s.id }}">
+              <option value="">-- Select --</option>
+              {% for st in statuses %}
+                <option value="{{ st }}" {% if existing.get(s.id) == st %}selected{% endif %}>{{ st }}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="text-muted">No enrolled students.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <button class="btn btn-success" type="submit">Save Attendance</button>
+</form>
+{% endblock %}

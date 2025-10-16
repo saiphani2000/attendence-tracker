@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">Teacher Dashboard</h3>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card text-bg-primary">
+      <div class="card-body">
+        <div class="fw-bold">Total Sessions</div>
+        <div class="fs-3">{{ total_sessions }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-success">
+      <div class="card-body">
+        <div class="fw-bold">Total Students</div>
+        <div class="fs-3">{{ total_students }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="fw-bold mb-2">Attendance Summary</div>
+        <div class="row text-center">
+          <div class="col-3">
+            <div class="small text-muted">Present</div>
+            <div class="fs-5">{{ summary.present_pct }}%</div>
+          </div>
+          <div class="col-3">
+            <div class="small text-muted">Absent</div>
+            <div class="fs-5">{{ summary.absent_pct }}%</div>
+          </div>
+          <div class="col-3">
+            <div class="small text-muted">Late</div>
+            <div class="fs-5">{{ summary.late_pct }}%</div>
+          </div>
+          <div class="col-3">
+            <div class="small text-muted">Excused</div>
+            <div class="fs-5">{{ summary.excused_pct }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5>Your Courses</h5>
+  <a href="{{ url_for('courses') }}" class="btn btn-outline-primary">Manage Courses</a>
+</div>
+<div class="table-responsive">
+  <table class="table table-striped" data-sortable>
+    <thead>
+      <tr>
+        <th data-sort="string">Name</th>
+        <th data-sort="string">Code</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in courses %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.code }}</td>
+        <td>
+          <a class="btn btn-sm btn-outline-success" href="{{ url_for('create_session', course_id=c.id) }}">New Session</a>
+          <a class="btn btn-sm btn-outline-dark" href="{{ url_for('course_report', course_id=c.id) }}">Report</a>
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('enroll', course_id=c.id) }}">Enroll</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="text-muted">No courses yet. Create one from Courses page.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

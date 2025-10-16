@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Course Report — {{ course.name }} ({{ course.code }})</h3>
+  <a href="{{ url_for('courses') }}" class="btn btn-outline-secondary">Back to Courses</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover" data-sortable>
+    <thead>
+      <tr>
+        <th data-sort="string">Student</th>
+        <th data-sort="string">Email</th>
+        <th data-sort="int">Present</th>
+        <th data-sort="int">Absent</th>
+        <th data-sort="int">Late</th>
+        <th data-sort="int">Excused</th>
+        <th data-sort="pct">Attendance %</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.student.name }}</td>
+        <td>{{ r.student.email }}</td>
+        <td>{{ r.present }}</td>
+        <td>{{ r.absent }}</td>
+        <td>{{ r.late }}</td>
+        <td>{{ r.excused }}</td>
+        <td>{{ r.attendance_pct }}%</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="text-muted">No enrolled students.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

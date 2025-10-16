@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Create Session — {{ course.name }} ({{ course.code }})</h3>
+  <a href="{{ url_for('courses') }}" class="btn btn-outline-secondary">Back to Courses</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">Date</label>
+          <input type="date" name="date" value="{{ today }}" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Topic (optional)</label>
+          <input type="text" name="topic" class="form-control" placeholder="e.g., Chapter 1: Introduction">
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-primary w-100" type="submit">Create Session</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
