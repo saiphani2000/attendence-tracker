@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Admin Dashboard</h2>
+<div class="row g-4 mb-4">
+    {% for label, value in [('Users', stats.users), ('Teachers', stats.teachers), ('Students', stats.students), ('Courses', stats.courses), ('Sessions', stats.sessions)] %}
+    <div class="col-md-4 col-lg">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h3 class="text-primary">{{ value }}</h3>
+                <small class="text-muted">{{ label }}</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white"><h5 class="mb-0">Recent Audit Log</h5></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>Time</th><th>User</th><th>Action</th><th>Entity</th></tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                <tr>
+                    <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ log.user.name if log.user else 'System' }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.entity_type or '-' }} #{{ log.entity_id or '' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-muted text-center">No activity yet</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

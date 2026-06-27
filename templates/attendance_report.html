@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Report — {{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="mb-1">Attendance Report</h2>
+        <p class="text-muted mb-0">{{ course.name }} — {{ total_sessions }} session(s)</p>
+    </div>
+    <div class="btn-group flex-wrap">
+        <a href="{{ url_for('teacher.dashboard') }}" class="btn btn-outline-secondary btn-sm">Dashboard</a>
+        <a href="{{ url_for('teacher.export_attendance', course_id=course.id) }}" class="btn btn-outline-success btn-sm">Export CSV</a>
+        <a href="{{ url_for('teacher.manage_grades', course_id=course.id) }}" class="btn btn-outline-info btn-sm">Gradebook</a>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importModal">Import CSV</button>
+    </div>
+</div>
+
+{% if chart_data.labels %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white"><h5 class="mb-0">Attendance Trends</h5></div>
+    <div class="card-body"><canvas id="attendanceChart" height="100"></canvas></div>
+</div>
+{% endif %}
+
+{% if student_reports %}
+<div class="card border-0 shadow">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>#</th><th>Student</th><th class="text-center">%</th><th class="text-center">Status</th><th class="text-center">Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for report in student_reports %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ report.student.full_name }}</td>
+                    <td class="text-center fw-bold">{{ report.percentage }}%</td>
+                    <td class="text-center">
+                        {% if report.percentage >= 90 %}<span class="badge bg-success">Excellent</span>
+                        {% elif report.percentage >= 70 %}<span class="badge bg-warning">Good</span>
+                        {% else %}<span class="badge bg-danger">At Risk</span>{% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% for enrollment in report.student.enrollments if enrollment.course_id == course.id %}
+                        <form method="POST" action="{{ url_for('teacher.unenroll_student', enrollment_id=enrollment.id) }}" class="d-inline"
+                              onsubmit="return confirm('Unenroll this student?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Unenroll</button>
+                        </form>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow text-center py-5">
+    <p class="text-muted">No students enrolled.</p>
+    <a href="{{ url_for('teacher.create_student') }}?course_id={{ course.id }}" class="btn btn-primary">Enroll Students</a>
+</div>
+{% endif %}
+
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('teacher.import_students', course_id=course.id) }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-header"><h5 class="modal-title">Import Students</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <p class="small text-muted">CSV columns: <strong>Full Name</strong>, <strong>Email</strong>, Student ID (optional)</p>
+                    <input type="file" class="form-control" name="file" accept=".csv" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% if chart_data.labels %}
+<script>
+const chartData = {{ chart_data | tojson }};
+const colors = { Present: '#198754', Late: '#fd7e14', Excused: '#6f42c1', Absent: '#dc3545' };
+new Chart(document.getElementById('attendanceChart'), {
+    type: 'bar',
+    data: {
+        labels: chartData.labels,
+        datasets: Object.keys(chartData.datasets).map(status => ({
+            label: status,
+            data: chartData.datasets[status],
+            backgroundColor: colors[status],
+        })),
+    },
+    options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } },
+});
+</script>
+{% endif %}
+{% endblock %}

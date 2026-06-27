@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Gradebook — {{ course.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="mb-1">Gradebook</h2>
+        <p class="text-muted mb-0">{{ course.name }}{% if course.code %} ({{ course.code }}){% endif %}</p>
+    </div>
+    <div class="btn-group">
+        <a href="{{ url_for('teacher.attendance_report', course_id=course.id) }}" class="btn btn-outline-secondary btn-sm">Report</a>
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addGradeModal">Add Grade</button>
+    </div>
+</div>
+
+<div class="modal fade" id="addGradeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('teacher.manage_grades', course_id=course.id) }}" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="modal-header"><h5 class="modal-title">Add Grade</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">{{ form.student_id.label(class="form-label") }}{{ form.student_id(class="form-select") }}</div>
+                        <div class="col-md-6">{{ form.assignment_name.label(class="form-label") }}{{ form.assignment_name(class="form-control") }}</div>
+                        <div class="col-md-4">{{ form.grade_value.label(class="form-label") }}{{ form.grade_value(class="form-control") }}</div>
+                        <div class="col-md-4">{{ form.max_points.label(class="form-label") }}{{ form.max_points(class="form-control") }}</div>
+                        <div class="col-md-4">{{ form.assignment_type.label(class="form-label") }}{{ form.assignment_type(class="form-select") }}</div>
+                        <div class="col-md-6">{{ form.due_date.label(class="form-label") }}{{ form.due_date(class="form-control", type="date") }}</div>
+                        <div class="col-12">{{ form.notes.label(class="form-label") }}{{ form.notes(class="form-control", rows=2) }}</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add Grade</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if student_grades %}
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>Student</th><th class="text-center">Assignments</th><th class="text-center">Average</th><th class="text-center">Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for student_id, grades in student_grades.items() %}
+                {% set student = enrollments|selectattr('1.id', 'equalto', student_id)|map(attribute='1')|first %}
+                {% if student %}
+                {% set total_points = grades|sum(attribute='grade_value') %}
+                {% set max_points = grades|sum(attribute='max_points') %}
+                {% set avg = (total_points / max_points * 100) if max_points > 0 else 0 %}
+                <tr>
+                    <td>{{ student.full_name }}</td>
+                    <td class="text-center"><span class="badge bg-primary">{{ grades|length }}</span></td>
+                    <td class="text-center fw-bold">{{ "%.1f"|format(avg) }}%</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#grades-{{ student_id }}">Details</button>
+                    </td>
+                </tr>
+                <tr class="collapse" id="grades-{{ student_id }}">
+                    <td colspan="4" class="bg-light">
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Assignment</th><th>Grade</th><th>Type</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                {% for grade in grades %}
+                                <tr>
+                                    <td>{{ grade.assignment_name }}</td>
+                                    <td>{{ "%.1f"|format(grade.grade_value) }}/{{ "%.0f"|format(grade.max_points) }}</td>
+                                    <td>{{ grade.assignment_type or '-' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('teacher.edit_grade', grade_id=grade.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        <form method="POST" action="{{ url_for('teacher.delete_grade', grade_id=grade.id) }}" class="d-inline"
+                                              onsubmit="return confirm('Delete this grade?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow text-center py-5">
+    <p class="text-muted">No grades yet.</p>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGradeModal">Add First Grade</button>
+</div>
+{% endif %}
+{% endblock %}

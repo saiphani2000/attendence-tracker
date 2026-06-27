@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Grade{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-white"><h4 class="mb-0">Edit Grade — {{ course.name }}</h4></div>
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="row g-3">
+                        <div class="col-md-6">{{ form.student_id.label(class="form-label") }}{{ form.student_id(class="form-select") }}</div>
+                        <div class="col-md-6">{{ form.assignment_name.label(class="form-label") }}{{ form.assignment_name(class="form-control") }}</div>
+                        <div class="col-md-4">{{ form.grade_value.label(class="form-label") }}{{ form.grade_value(class="form-control") }}</div>
+                        <div class="col-md-4">{{ form.max_points.label(class="form-label") }}{{ form.max_points(class="form-control") }}</div>
+                        <div class="col-md-4">{{ form.assignment_type.label(class="form-label") }}{{ form.assignment_type(class="form-select") }}</div>
+                        <div class="col-md-6">{{ form.due_date.label(class="form-label") }}{{ form.due_date(class="form-control", type="date") }}</div>
+                        <div class="col-12">{{ form.notes.label(class="form-label") }}{{ form.notes(class="form-control", rows=3) }}</div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('teacher.manage_grades', course_id=course.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
